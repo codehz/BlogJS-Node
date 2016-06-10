@@ -39,7 +39,7 @@ const blog = {
       blogname
     })
     if (!found) {
-      ctx.throw('Couldn\'t found your blog.', 404)
+      return ctx.status = 404
     }
     ctx.body = await found.remove()
   }
