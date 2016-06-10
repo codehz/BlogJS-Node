@@ -163,6 +163,26 @@ describe('API', () => {
       })
     })
 
+    describe('delete others blog', () => {
+      it('should be failed(403 Forbidden)', done => {
+        request
+        .delete('/api/blogs/test')
+        .set('Authorization', token2)
+        .expect('Content-Type', /json/)
+        .expect(403, done)
+      })
+    })
+
+    describe('delete unknow blog', () => {
+      it('should be failed(404 Not Found)', done => {
+        request
+        .delete('/api/blogs/unknown')
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(404, done)
+      })
+    })
+
     describe('delete blog (owner)', () => {
       it('should be successed(200)', done => {
         request
@@ -170,16 +190,6 @@ describe('API', () => {
         .set('Authorization', token)
         .expect('Content-Type', /json/)
         .expect(200, done)
-      })
-    })
-    
-    describe('delete others blog', () => {
-      it('should be failed(404 Not Found)', done => {
-        request
-        .delete('/api/blogs/test2')
-        .set('Authorization', token)
-        .expect('Content-Type', /json/)
-        .expect(404, done)
       })
     })
   })
