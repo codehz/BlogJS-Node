@@ -12,6 +12,12 @@ const msgs = {
   toomuchblog: 'You do not have permission to create more than one blog.'
 }
 
+const authRoot = {
+  username: 'root',
+  password: '12345678',
+  admin: true
+}
+
 const auth = {
   username: 'cohars',
   password: 'pcw'
@@ -24,6 +30,9 @@ const auth2 = {
 
 let token = ''
 let token2 = ''
+let tokenRoot = ''
+
+User.create(authRoot);
 
 describe('API', () => {
   describe('POST /signup', done => {
@@ -77,6 +86,18 @@ describe('API', () => {
       .expect(200, (err, res) => {
         if (err) console.log(err)
         token2 = res.body.token
+        done()
+      })
+    })
+
+    it('should respond 200(root)', done => {
+      request
+      .post('/api/signin')
+      .send(authRoot)
+      .expect('Content-Type', /json/)
+      .expect(200, (err, res) => {
+        if (err) console.log(err)
+        tokenRoot = res.body.token
         done()
       })
     })
@@ -188,6 +209,39 @@ describe('API', () => {
         request
         .delete('/api/blogs/test')
         .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(200, done)
+      })
+    })
+
+    describe('Create the test blog(test)', () => {
+      it('should respond 201', done => {
+        request
+        .post('/api/blogs')
+        .send({
+          blogname: 'testForce'
+        })
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(201, done)
+      })
+    })
+
+    describe('delete blog force(normal user)', () => {
+      it('should be failed(403 Forbidden)', done => {
+        request
+        .delete('/api/blogs/testForce/force')
+        .set('Authorization', token2)
+        .expect('Content-Type', /json/)
+        .expect(403, done)
+      })
+    })
+
+    describe('delete blog force(super user)', () => {
+      it('should be fsuccessed(200)', done => {
+        request
+        .delete('/api/blogs/testForce/force')
+        .set('Authorization', tokenRoot)
         .expect('Content-Type', /json/)
         .expect(200, done)
       })

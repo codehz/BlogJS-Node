@@ -32,8 +32,8 @@ const getuser = async (ctx, next) => {
 
 privateRouter.use(getuser)
 adminRouter.use(getuser, async (ctx, next) => {
-  if (ctx.state.admin) return await next();
-  ctx.throw('Operation not permitted', 403)
+  if (ctx.state.user.admin) return await next()
+  ctx.status = 403
 })
 
 // ROUTER
@@ -48,6 +48,7 @@ privateRouter.put('/users/update', users.update)
 publicRouter.get('/blogs', blogs.list)
 privateRouter.post('/blogs', blogs.create)
 privateRouter.delete('/blogs/:blogname', blogs.deleteSelf)
+adminRouter.delete('/blogs/:blogname/force', blogs.deleteForce)
 
 // Admin permissions
 // privateRouter.put('/users/update/:id', isAdmin, users.admin.update)
@@ -66,5 +67,7 @@ export default [
   publicRouter.allowedMethods(),
   protectRoutes,
   privateRouter.routes(),
-  privateRouter.allowedMethods()
+  privateRouter.allowedMethods(),
+  adminRouter.routes(),
+  adminRouter.allowedMethods()
 ]

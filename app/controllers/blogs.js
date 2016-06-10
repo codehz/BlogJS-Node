@@ -15,7 +15,6 @@ const blog = {
         owner: ctx.state.user._id
       })
       if (found) {
-        console.log('this');
         ctx.status = 412
         return ctx.body = {message: 'You do not have permission to create more than one blog.'}
       }
@@ -41,6 +40,17 @@ const blog = {
     }
     if (found.owner != ctx.state.user._id) {
       return ctx.status = 403
+    }
+    ctx.body = await found.remove()
+  },
+
+  deleteForce: async (ctx, next) => {
+    const {blogname = ctx.throw('You must special the blogname in your request params.', 401)} = ctx.params;
+    const found = await Blog.findOne({
+      blogname
+    })
+    if (!found) {
+      return ctx.status = 404
     }
     ctx.body = await found.remove()
   }
