@@ -6,13 +6,15 @@ import {jwtConf} from './config'
 
 // import {isAdmin} from '../utils/permissions'
 import users from '../app/controllers/users'
+import blogs from '../app/controllers/blogs'
 
 const opts = {prefix: '/api'}
 
 const publicRouter = router(opts)
 const privateRouter = router(opts)
+const adminRouter = router(opts)
 
-privateRouter.use(async (ctx, next) => {
+const getuser = async (ctx, next) => {
   try {
     const decoded = jwt.verify(ctx.headers.authorization, jwtConf.key)
     if (decoded.username !== undefined) {
@@ -26,6 +28,15 @@ privateRouter.use(async (ctx, next) => {
   } catch (err) {
     ctx.throw(err, 401)
   }
+}
+
+privateRouter.use(getuser)
+adminRouter.use(getuser, async (ctx, next) => {
+  if (ctx.state.admin) return await next();
+  ctx.throw({
+    status: 401,
+    msg: 'Operation not permitted'
+  })
 })
 
 // ROUTER
@@ -35,6 +46,10 @@ publicRouter.post('/users/signup', users.signup)
 publicRouter.post('/users/signin', users.signin)
 publicRouter.get('/users/:username', users.get)
 privateRouter.put('/users/update', users.update)
+
+//Blogs
+publicRouter.get('/blogs', blogs.list)
+privateRouter.post('/blogs', blogs.create)
 
 // Admin permissions
 // privateRouter.put('/users/update/:id', isAdmin, users.admin.update)

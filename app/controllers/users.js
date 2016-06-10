@@ -54,11 +54,12 @@ const users = {
 
   get: async (ctx, next) => {
     try {
-      ctx.body = await User.findOne(
-        {username: ctx.params.username},
-        'username createdAt updatedAt admin'
+      ctx.body = pick(['username', 'createdAt'],
+        await User.findOne(
+          {username: ctx.params.username},
+          'username createdAt updatedAt admin'
+        )
       )
-
       if (!ctx.body) {
         ctx.status = 404
       }
@@ -69,10 +70,12 @@ const users = {
 
   update: async (ctx, next) => {
     try {
-      ctx.body = await User.findOneAndUpdateAsync(
-        {_id: ctx.state.user._id},
-        omit(['admin'], ctx.request.body),
-        {new: true}
+      ctx.body = pick(['username', 'createdAt'],
+        await User.findOneAndUpdateAsync(
+          {_id: ctx.state.user._id},
+          omit(['admin'], ctx.request.body),
+          {new: true}
+        )
       )
     } catch (err) {
       ctx.throw(err)

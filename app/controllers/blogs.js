@@ -7,6 +7,9 @@ import Blog from '../models/blog'
 const blog = {
     list: async (ctx, next) => {
         ctx.body = await Blog.find({});
+    },
+    create: async (ctx, next) => {
+        ctx.body = ctx.state;
     }
 }
 
