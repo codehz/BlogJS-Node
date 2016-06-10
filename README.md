@@ -1,3 +1,3 @@
 # BlogJS
 
-BlogJs
+BlogJs is a simple Node.js blog platform.
