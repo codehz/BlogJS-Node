@@ -17,7 +17,7 @@ const auth = {
 
 let token = ''
 
-describe('user', () => {
+describe('API', () => {
   describe('POST /users/signup', done => {
     it('should respond 201', done => {
       request
@@ -51,6 +51,14 @@ describe('user', () => {
         token = res.body.token
         done()
       })
+    })
+
+    it('should give access to the private routes', done => {
+      request
+      .get('/api/private')
+      .set('Authorization', token)
+      .expect('Content-Type', /json/)
+      .expect(200, done)
     })
   })
 
