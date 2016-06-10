@@ -201,6 +201,3 @@ describe('API', () => {
     })
   })
 })
-// , () => {
-//         User.remove({username: 'exists'}, done)
-//       }
