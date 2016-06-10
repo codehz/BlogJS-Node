@@ -11,7 +11,7 @@ export const jwtConf = {
   expiresIn: '1d',
   alg: 'HS256'
 }
-const dbName = process.env.NODE_ENV === 'test' ? 'db-test' : 'my-db'
+const dbName = process.env.NODE_ENV === 'test' ? 'db-test' : 'blogjs-db'
 export const db = {
   host: '127.0.0.1',
   port: 27017,
