@@ -20,7 +20,7 @@ export const db = {
   pass: ''
 }
 
-const max = process.env.NODE_ENV === 'test' ? 10 : 10
+const max = process.env.NODE_ENV === 'test' ? 100000 : 10
 export const rateLimit = {
   max: process.env.RATE_LIMIT || max,
   duration: process.env.RATE_LIMIT_DUR || 10000

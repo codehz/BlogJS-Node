@@ -5,9 +5,11 @@ var server = require('../server')
 var request = require('supertest').agent(server.listen())
 
 import User from '../app/models/user'
+import Blog from '../app/models/blog'
 
 const msgs = {
-  usernameNotUnique: 'ValidationError: Path `password` is required., Error, expected `username` to be unique. Value: `cohars`'
+  usernameNotUnique: 'ValidationError: Path `password` is required., Error, expected `username` to be unique. Value: `cohars`',
+  toomuchblog: 'You do not have permission to create more than one blog.'
 }
 
 const auth = {
@@ -15,21 +17,35 @@ const auth = {
   password: 'pcw'
 }
 
+const auth2 = {
+  username: 'test',
+  password: 'test'
+}
+
 let token = ''
+let token2 = ''
 
 describe('API', () => {
-  describe('POST /users/signup', done => {
+  describe('POST /signup', done => {
     it('should respond 201', done => {
       request
-      .post('/api/users/signup')
+      .post('/api/signup')
       .send(auth)
+      .expect('Content-Type', /json/)
+      .expect(201, done)
+    })
+
+    it('should respond 201(test)', done => {
+      request
+      .post('/api/signup')
+      .send(auth2)
       .expect('Content-Type', /json/)
       .expect(201, done)
     })
 
     it('should respond 400', done => {
       request
-      .post('/api/users/signup')
+      .post('/api/signup')
       .send({
         username: 'cohars'
       })
@@ -40,15 +56,27 @@ describe('API', () => {
     })
   })
 
-  describe('POST /users/signin', () => {
+  describe('POST /signin', () => {
     it('should respond 200', done => {
       request
-      .post('/api/users/signin')
+      .post('/api/signin')
       .send(auth)
       .expect('Content-Type', /json/)
       .expect(200, (err, res) => {
         if (err) console.log(err)
         token = res.body.token
+        done()
+      })
+    })
+
+    it('should respond 200(test)', done => {
+      request
+      .post('/api/signin')
+      .send(auth2)
+      .expect('Content-Type', /json/)
+      .expect(200, (err, res) => {
+        if (err) console.log(err)
+        token2 = res.body.token
         done()
       })
     })
@@ -80,15 +108,63 @@ describe('API', () => {
       request
       .get('/api/users/exists')
       .expect('Content-Type', /json/)
-      .expect(200, {
-        username: 'exists'
-      }, () => {
-        User.remove({username: 'exists'}, done)
+      .expect(200, done)
+    })
+  })
+  
+  describe('Test Blog API', () => {
+    describe('GET /blogs', () => {
+      it('should respond 200, and body is []', done => {
+        request
+        .get('/api/blogs')
+        .expect('Content-Type', /json/)
+        .expect(200, [], done)
+      })
+    })
+
+    describe('Create the first blog', () => {
+      it('should respond 201', done => {
+        request
+        .post('/api/blogs')
+        .send({
+          blogname: 'test'
+        })
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(201, done)
+      })
+    })
+
+    describe('Create the second blog', () => {
+      it('should respond 412', done => {
+        request
+        .post('/api/blogs')
+        .send({
+          blogname: 'test2'
+        })
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(412, {
+          message: msgs.toomuchblog
+        }, done)
+      })
+    })
+
+    describe('Create same name blog (By other user(test))', () => {
+      it('should respond 400', done => {
+        request
+        .post('/api/blogs')
+        .send({
+          blogname: 'test'
+        })
+        .set('Authorization', token2)
+        .expect('Content-Type', /json/)
+        .expect(400, done)
       })
     })
   })
 
-  describe('Test errors', () => {
+  describe('Test unknow', () => {
     describe('GET /users/unknown', () => {
       it('should respond 4O4 not found', done => {
         request
@@ -96,8 +172,15 @@ describe('API', () => {
         .expect('Content-Type', /json/)
         .expect(404, {
           message: 'Resource not found'
-        }, done)
+        }, async () => {
+          await User.remove({})
+          await Blog.remove({})
+          done()
+        })
       })
     })
   })
 })
+// , () => {
+//         User.remove({username: 'exists'}, done)
+//       }

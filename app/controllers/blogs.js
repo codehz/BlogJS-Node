@@ -15,14 +15,17 @@ const blog = {
         owner: ctx.state.user._id
       })
       if (found) {
-        ctx.throw('You do not have permission to create more than one blog.', 412)
+        console.log('this');
+        ctx.status = 412
+        return ctx.body = {message: 'You do not have permission to create more than one blog.'}
       }
     }
-    const {blogname = ctx.throw({status: 401, message: 'You must special the blogname in your post body.'})} = ctx.request.body;
+    const {blogname = ctx.throw({status: 400, message: 'You must special the blogname in your post body.'})} = ctx.request.body;
     try {
       ctx.body = await Blog.createAsync({blogname, owner: ctx.state.user._id})
     } catch (err) {
-      ctx.throw(err, 400)
+      ctx.status = 400
+      return ctx.body = err
     }
 
     ctx.status = 201

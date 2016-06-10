@@ -39,8 +39,8 @@ adminRouter.use(getuser, async (ctx, next) => {
 // ROUTER
 
 // Users
-publicRouter.post('/users/signup', users.signup)
-publicRouter.post('/users/signin', users.signin)
+publicRouter.post('/signup', users.signup)
+publicRouter.post('/signin', users.signin)
 publicRouter.get('/users/:username', users.get)
 privateRouter.put('/users/update', users.update)
 
